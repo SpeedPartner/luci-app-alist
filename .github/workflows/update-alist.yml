@@ -2,15 +2,12 @@ name: Update Alist & Alist-Web
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
-  workflow_dispatch:
-  push:
-    tags:
-      - "run-update"
+    - cron: "0 */12 * * *"   # 每 12 小时检查一次
+  workflow_dispatch:         # 手动运行按钮
 
 jobs:
   update:
-    runs-on: docker
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -18,7 +15,8 @@ jobs:
 
       - name: Install tools
         run: |
-          apk add --no-cache curl jq sed coreutils
+          sudo apt update
+          sudo apt install -y jq curl
 
       - name: Fetch latest Alist version
         id: alist
@@ -42,19 +40,19 @@ jobs:
 
       - name: Update Makefile
         run: |
-          MF=./Makefile
+          MF=alist/Makefile
+          echo "Updating: $MF"
 
           sed -i "s/^PKG_VERSION:=.*/PKG_VERSION:=${{ steps.alist.outputs.version }}/" $MF
           sed -i "s/^PKG_WEB_VERSION:=.*/PKG_WEB_VERSION:=${{ steps.alist_web.outputs.web_version }}/" $MF
           sed -i "s/^PKG_HASH:=.*/PKG_HASH:=${{ steps.alist.outputs.hash }}/" $MF
-
           sed -i "s/^  HASH:=.*/  HASH:=${{ steps.alist_web.outputs.web_hash }}/" $MF
 
       - name: Commit & Push
         run: |
-          git config --global user.email "bot@gitea"
-          git config --global user.name "Gitea Bot"
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
 
-          git add Makefile
-          git commit -m "Update Alist to ${{ steps.alist.outputs.version }} & Alist-Web to ${{ steps.alist_web.outputs.web_version }}"
+          git add alist/Makefile
+          git commit -m "Update Alist to ${{ steps.alist.outputs.version }} & Alist-Web to ${{ steps.alist_web.outputs.web_version }}" || echo "No changes"
           git push
