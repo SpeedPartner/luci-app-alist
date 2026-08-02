@@ -40,7 +40,7 @@ jobs:
 
       - name: Update Makefile
         run: |
-          MF=./Makefile
+          MF=./alist/Makefile
 
           sed -i "s/^PKG_VERSION:=.*/PKG_VERSION:=${{ steps.alist.outputs.version }}/" $MF
           sed -i "s/^PKG_WEB_VERSION:=.*/PKG_WEB_VERSION:=${{ steps.alist_web.outputs.web_version }}/" $MF
