@@ -41,11 +41,11 @@ jobs:
       - name: Update Makefile
         run: |
           MF=alist/Makefile
+          echo "Updating: $MF"
 
           sed -i "s/^PKG_VERSION:=.*/PKG_VERSION:=${{ steps.alist.outputs.version }}/" $MF
           sed -i "s/^PKG_WEB_VERSION:=.*/PKG_WEB_VERSION:=${{ steps.alist_web.outputs.web_version }}/" $MF
           sed -i "s/^PKG_HASH:=.*/PKG_HASH:=${{ steps.alist.outputs.hash }}/" $MF
-
           sed -i "s/^  HASH:=.*/  HASH:=${{ steps.alist_web.outputs.web_hash }}/" $MF
 
       - name: Commit & Push
@@ -53,6 +53,6 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          git add Makefile
+          git add alist/Makefile
           git commit -m "Update Alist to ${{ steps.alist.outputs.version }} & Alist-Web to ${{ steps.alist_web.outputs.web_version }}" || echo "No changes"
           git push
