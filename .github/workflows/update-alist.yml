@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "0 */12 * * *"   # 每 12 小时检查一次
   workflow_dispatch:         # 手动运行按钮
+  push:
+    branches:
+      - "*"
 
 jobs:
   update:
