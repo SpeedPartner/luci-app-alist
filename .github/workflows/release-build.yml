@@ -25,6 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: lua
           fetch-depth: 0
 
       - name: Read PKG_VERSION from Makefile
