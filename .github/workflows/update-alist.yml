@@ -2,19 +2,21 @@ name: Update Alist & Alist-Web
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # 每 12 小时检查一次
+    - cron: "0 */12 * * *"   # 每 12 小时自动运行
   workflow_dispatch:         # 手动运行按钮
   push:
     branches:
-      - "*"
+      - "*"                  # 所有分支 push 时触发
 
 jobs:
   update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout current branch
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}   # 自动 checkout 当前分支
 
       - name: Install tools
         run: |
@@ -58,4 +60,5 @@ jobs:
 
           git add alist/Makefile
           git commit -m "Update Alist to ${{ steps.alist.outputs.version }} & Alist-Web to ${{ steps.alist_web.outputs.web_version }}" || echo "No changes"
-          git push
+
+          git push origin HEAD:${{ github.ref_name }}   # 推回当前分支
