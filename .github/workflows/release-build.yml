@@ -4,42 +4,19 @@ on:
   push:
     tags:
       - "*"
-  workflow_dispatch:         # 手动运行按钮
+    branches:
+      - lua
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         arch:
-          - aarch64_cortex-a53
-          - aarch64_cortex-a72
-          - aarch64_generic
-          - arm_arm1176jzf-s_vfp
-          - arm_arm926ej-s
-          - arm_cortex-a15_neon-vfpv4
-          - arm_cortex-a5_vfpv4
-          - arm_cortex-a7
-          - arm_cortex-a7_neon-vfpv4
-          - arm_cortex-a8_vfpv3
-          - arm_cortex-a9
-          - arm_cortex-a9_neon
-          - arm_cortex-a9_vfpv3-d16
-          - arm_fa526
-          - arm_mpcore
-          - arm_xscale
-          - i386_pentium-mmx
-          - i386_pentium4
-          - mips64_octeonplus
-          - mips_24kc
-          - mips_4kec
-          - mips_mips32
-          - mipsel_24kc
-          - mipsel_24kc_24kf
-          - mipsel_74kc
-          - mipsel_mips32
           - x86_64
         sdk:
           - openwrt-21.02
@@ -50,8 +27,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Read PKG_VERSION from Makefile
+        id: version
+        run: |
+          RAW=$(grep "^PKG_VERSION:=" alist/Makefile | sed 's/PKG_VERSION:=//')
+          echo "alist_version_raw=$RAW" >> $GITHUB_OUTPUT
+          echo "alist_version=v$RAW" >> $GITHUB_OUTPUT
+
       - name: Build
-        uses: sbwml/openwrt-gh-action-sdk@go1.24
+        uses: sbwml/openwrt-gh-action-sdk@go1.26
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
@@ -68,10 +52,16 @@ jobs:
         run: |
           tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
 
+      - name: Create tag
+        run: |
+          git tag ${{ steps.version.outputs.alist_version }}
+          git push origin ${{ steps.version.outputs.alist_version }}
+
       - name: Upload packages
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref_name }}
+          tag: ${{ steps.version.outputs.alist_version }}
+          name: lua ${{ steps.version.outputs.alist_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
