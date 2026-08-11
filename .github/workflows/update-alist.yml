@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        branch: ["main", "alist", "dev"]   # 你想更新的所有分支
+        branch: ["main", "lua"]   # 你想更新的所有分支
 
     steps:
       - name: Checkout target branch
