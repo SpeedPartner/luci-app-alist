@@ -36,7 +36,7 @@ jobs:
           echo "alist_version=v$RAW" >> $GITHUB_OUTPUT
 
       - name: Build
-        uses: sbwml/openwrt-gh-action-sdk@go1.26
+        uses: sbwml/openwrt-gh-action-sdk@go1.27
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
